@@ -3,9 +3,21 @@
 DATASET_PATH="${INAT_PATH}"
 
 # 1. Save original activations
+# for SPLIT in "train" "val"; do
+#   python save_activations.py \
+#     --batch_size 16 \
+#     --model_name "meta-llama/Llama-3.2-11b-vision-instruct" \
+#     --attachment_point "post_mlp_residual" \
+#     --layer 30 \
+#     --dataset_name "imagenet" \
+#     --split "${SPLIT}" \
+#     --data_path "/path/to/imagenet" \
+#     --num_workers 8 \
+#     --output_dir "./activations_dir/llama_activations"
+# done
 for SPLIT in "train" "val"; do
-  python save_activations.py \
-    --batch_size 16 \
+  torchrun --nproc_per_node=2 save_activations_ddp.py \
+    --batch_size 32 \
     --model_name "meta-llama/Llama-3.2-11b-vision-instruct" \
     --attachment_point "post_mlp_residual" \
     --layer 30 \
@@ -13,24 +25,11 @@ for SPLIT in "train" "val"; do
     --split "${SPLIT}" \
     --data_path "/path/to/imagenet" \
     --num_workers 8 \
-    --output_dir "./activations_dir/llama_activations"
+    --output_dir "./activations_dir/llama_activations" \
+    --device "cuda:0" \
+    --save_every 50000
 done
 
-
-for SPLIT in "train" "val"; do
-  python save_activations.py \
-    --batch_size 32 \
-    --model_name "clip-vit-large-patch14-336" \
-    --attachment_point "post_projection" \
-    --layer "-1" \
-    --dataset_name "inat" \
-    --split "${SPLIT}" \
-    --data_path "${DATASET_PATH}" \
-    --num_workers 8 \
-    --output_dir "./activations_dir/raw/inat_${SPLIT}_activations_clip-vit-large-patch14-336_-1_post_projection" \
-    --cls_only \
-    --save_every 100
-done
 
 # 2. Train SAE
 python sae_train.py \
