@@ -8,9 +8,9 @@ for SPLIT in "train" "val"; do
     --batch_size 16 \
     --model_name "meta-llama/Llama-3.2-11b-vision-instruct" \
     --attachment_point "post_mlp_residual" \
-    --layer 22 \
+    --layer 30 \
     --dataset_name "imagenet" \
-    --split "train" \
+    --split "${SPLIT}" \
     --data_path "/path/to/imagenet" \
     --num_workers 8 \
     --output_dir "./activations_dir/llama_activations"
