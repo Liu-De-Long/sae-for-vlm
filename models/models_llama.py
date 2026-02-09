@@ -52,8 +52,8 @@ class LlamaVision:
         # 清空 register 中的激活
         for hook in list(self.register.keys()):
             self.register[hook] = []
-        inputs = {k: v.to(device) for k, v in inputs.items() if torch.is_tensor(v)}
-        outputs = self.model.vision_model(inputs)
+        inputs = {k: v.to(self.device) for k, v in inputs.items() if torch.is_tensor(v)}
+        outputs = self.model.vision_model(**inputs)
         # outputs = self.model.vision_model(**inputs.to(self.device))
         return outputs.last_hidden_state
 
